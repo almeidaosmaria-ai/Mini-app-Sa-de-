@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>SuaSaúde - Controle de Medicamentos</title>
+ <!-- Tailwind CSS para estilização rápida e responsiva -->
+ <script src="https://cdn.tailwindcss.com"></script>
+ <!-- Ícones Lucide -->
+ <script src="https://unpkg.com/lucide@latest"></script>
+ <style>
+ @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+ body {
+ font-family: 'Inter', sans-serif;
+ -webkit-tap-highlight-color: transparent;
+ }
+ /* Efeito suave de transição */
+ .smooth-transition {
+ transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+ }
+ </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col justify-between">
+  
+ <!-- Container do App (Estilo Smartphone / Responsivo) -->
+ <div class="max-w-md mx-auto w-full bg-white min-h-screen shadow-xl flex flex-col justify-between relative overflow-hidden">
+  
+ <!-- Cabeçalho Principal -->
+ <header class="bg-gradient-to-r from-sky-600 to-teal-600 text-white p-5 rounded-b-3xl shadow-md">
+ <div class="flex justify-between items-center mb-3">
+ <div>
+ <span class="text-xs font-semibold uppercase tracking-wider text-teal-100 bg-white/20 px-2.5 py-1 rounded-full">Modo Gratuito</span>
+ <h1 class="text-2xl font-bold mt-1">Minha Saúde</h1>
+ </div>
+ <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+ <i data-lucide="heart-pulse" class="w-6 h-6 text-white"></i>
+ </div>
+ </div>
+ <p class="text-xs text-sky-100">Organize seus horários e anote como está se sentindo hoje.</p>
+ </header>
+  
+ <!-- Conteúdo Principal -->
+ <main class="flex-1 p-4 space-y-5 overflow-y-auto pb-24">
+  
+ <!-- Banner Informativo -->
+ <div class="bg-sky-50 border border-sky-100 rounded-2xl p-3.5 flex items-start gap-3">
+ <i data-lucide="info" class="w-5 h-5 text-sky-600 shrink-0 mt-0.5"></i>
+ <div class="text-xs text-sky-900 leading-relaxed">
+ Você pode cadastrar até <strong>2 remédios</strong> no plano teste. Confirme suas doses e digite sintomas ou reações no diário.
+ </div>
+ </div>
+  
+ <!-- Seção: Botão Adicionar & Contador -->
+ <div class="flex justify-between items-center">
+ <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
+ <i data-lucide="pill" class="w-5 h-5 text-teal-600"></i> Remédios de Hoje
+ </h2>
+ <button onclick="abrirModalAdd()" class="bg-teal-600 hover:bg-teal-700 active:scale-95 text-white font-medium text-xs px-3.5 py-2 rounded-xl flex items-center gap-1.5 shadow-sm smooth-transition">
+ <i data-lucide="plus" class="w-4 h-4"></i> Adicionar
+ </button>
+ </div>
+  
+ <!-- Lista de Remédios -->
+ <div id="listaRemedios" class="space-y-4">
+ <!-- Inserido dinamicamente via JS -->
+ </div>
+  
+ <!-- Histórico & Relatório do Médico -->
+ <div class="pt-2">
+ <button onclick="abrirBloqueio('historico')" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium text-xs p-3.5 rounded-2xl border border-slate-200 flex items-center justify-between smooth-transition">
+ <span class="flex items-center gap-2">
+ <i data-lucide="file-text" class="w-4 h-4 text-sky-600"></i> Ver Histórico Completo de Sintomas
+ </span>
+ <i data-lucide="lock" class="w-4 h-4 text-amber-500"></i>
+ </button>
+ </div>
+  
+ </main>
+  
+ <!-- Barra de Navegação Inferior -->
+ <nav class="fixed bottom-0 max-w-md w-full bg-white border-t border-slate-100 p-3 flex justify-around items-center shadow-lg">
+ <button class="flex flex-col items-center gap-1 text-teal-600 font-semibold text-xs">
+ <i data-lucide="calendar" class="w-5 h-5"></i> Hoje
+ </button>
+ <button onclick="abrirBloqueio('familia')" class="flex flex-col items-center gap-1 text-slate-400 font-medium text-xs hover:text-slate-600">
+ <i data-lucide="users" class="w-5 h-5"></i> Família <span class="bg-amber-100 text-amber-700 text-[10px] px-1.5 rounded-full font-bold">PRO</span>
+ </button>
+ <button onclick="abrirBloqueio('medico')" class="flex flex-col items-center gap-1 text-slate-400 font-medium text-xs hover:text-slate-600">
+ <i data-lucide="stethoscope" class="w-5 h-5"></i> Médico <span class="bg-amber-100 text-amber-700 text-[10px] px-1.5 rounded-full font-bold">PRO</span>
+ </button>
+ </nav>
+  
+ <!-- MODAL 1: Adicionar Medicamento -->
+ <div id="modalAdd" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+ <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in duration-200">
+ <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+ <h3 class="font-bold text-slate-800 text-base">Novo Medicamento</h3>
+ <button onclick="fecharModalAdd()" class="text-slate-400 hover:text-slate-600">
+ <i data-lucide="x" class="w-5 h-5"></i>
+ </button>
+ </div>
+  
+ <div class="space-y-3">
+ <div>
+ <label class="block text-xs font-semibold text-slate-600 mb-1">Nome do Remédio</label>
+ <input type="text" id="inputNome" placeholder="Ex: Losartana, Dipirona" class="w-full text-sm border border-slate-200 rounded-xl p-3 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500">
+ </div>
+ <div class="grid grid-cols-2 gap-2">
+ <div>
+ <label class="block text-xs font-semibold text-slate-600 mb-1">Horário</label>
+ <input type="time" id="inputHorario" class="w-full text-sm border border-slate-200 rounded-xl p-3 focus:outline-none focus:border-teal-500">
+ </div>
+ <div>
+ <label class="block text-xs font-semibold text-slate-600 mb-1">Dosagem</label>
+ <input type="text" id="inputDose" placeholder="Ex: 50mg, 1 comprimido" class="w-full text-sm border border-slate-200 rounded-xl p-3 focus:outline-none focus:border-teal-500">
+ </div>
+ </div>
+ </div>
+  
+ <div class="pt-2 flex gap-2">
+ <button onclick="fecharModalAdd()" class="w-1/2 bg-slate-100 text-slate-600 font-semibold text-xs py-3 rounded-xl hover:bg-slate-200">Cancelar</button>
+ <button onclick="salvarRemedio()" class="w-1/2 bg-teal-600 text-white font-semibold text-xs py-3 rounded-xl hover:bg-teal-700 shadow-sm">Salvar</button>
+ </div>
+ </div>
+ </div>
+  
+ <!-- MODAL 2: Trava Freemium / Upgrade -->
+ <div id="modalBloqueio" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+ <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl text-center space-y-4 relative overflow-hidden animate-in fade-in zoom-in duration-200">
+ <div class="absolute -top-12 -right-12 w-28 h-28 bg-amber-100 rounded-full blur-xl opacity-70"></div>
+ <div class="absolute -top-12 -left-12 w-28 h-28 bg-sky-100 rounded-full blur-xl opacity-70"></div>
+  
+ <div class="w-14 h-14 bg-gradient-to-tr from-amber-500 to-amber-400 text-white rounded-2xl flex items-center justify-center mx-auto shadow-lg shadow-amber-500/20">
+ <i data-lucide="crown" class="w-8 h-8"></i>
+ </div>
+  
+ <div class="space-y-1.5">
+ <span class="text-[11px] font-bold text-amber-600 uppercase tracking-wider bg-amber-50 px-2.5 py-1 rounded-full">Acesso Ilimitado</span>
+ <h3 class="text-lg font-bold text-slate-800">Desbloqueie sua Saúde Completa</h3>
+ <p id="msgBloqueio" class="text-xs text-slate-500 leading-relaxed">
+ Você atingiu o limite de 2 remédios do plano teste. Ative seu período de 7 dias grátis para cadastrar medicamentos ilimitados e salvar todo o histórico de sintomas para o seu médico.
+ </p>
+ </div>
+  
+ <div class="bg-slate-50 p-3.5 rounded-2xl text-left text-xs space-y-2 border border-slate-100 text-slate-700">
+ <div class="flex items-center gap-2">
+ <i data-lucide="check-circle-2" class="w-4 h-4 text-teal-600 shrink-0"></i>
+ <span>Remédios e alertas ilimitados</span>
+ </div>
+ <div class="flex items-center gap-2">
+ <i data-lucide="check-circle-2" class="w-4 h-4 text-teal-600 shrink-0"></i>
+ <span>Diário completo de sintomas & reações</span>
+ </div>
+ <div class="flex items-center gap-2">
+ <i data-lucide="check-circle-2" class="w-4 h-4 text-teal-600 shrink-0"></i>
